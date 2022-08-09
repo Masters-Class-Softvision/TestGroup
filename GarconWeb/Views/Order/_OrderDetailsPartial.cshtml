@@ -1,0 +1,66 @@
+﻿@model GarconDomain.ViewModels.OrderDetailViewModel
+
+<div>
+    <h4>Your Basket</h4>
+    <hr />
+
+    @if (Model.OrderItems.Count == 0)
+    {
+        <p>
+            Start adding items to your basket.
+        </p>
+    }
+
+    @foreach (var item in Model.OrderItems)
+    {
+        <p>
+            @(item.Quantity + "x " + item.MenuItemName) @string.Format("{0:C}", item.MenuItemPrice * item.Quantity)
+            <input id="@item.MenuItemId" type="button" onclick="updateDraftOrder(@item.MenuItemId, 'Decrement')" class="button1" value="-" />
+            <input id="@item.MenuItemId" type="button" onclick="updateDraftOrder(@item.MenuItemId, 'Increment')" class="button1" value="+" />
+        </p>
+    }
+
+    @if (Model.OrderItems.Count > 0)
+    {
+        <dl class="dl-horizontal">
+            <dt>
+                Sub Total:
+            </dt>
+            <dd>
+                @string.Format("{0:C}", Model.OrderComputation.SubTotal)
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+                Service Charge:
+            </dt>
+            <dd>
+                @string.Format("{0:C}", Model.OrderComputation.ServiceCharge)
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+                Inclusive Tax:
+            </dt>
+            <dd>
+                @string.Format("{0:C}", Model.OrderComputation.InclusiveTax)
+            </dd>
+        </dl>
+
+        <dl class="dl-horizontal">
+            <dt>
+                Total Amount:
+            </dt>
+            <dd>
+                @string.Format("{0:C}", Model.OrderComputation.TotalAmount)
+            </dd>
+        </dl>
+        <dl class="dl-horizontal">
+            <dt>
+
+                <input type="button" onclick="placeOrder(@Model.OrderId)" class="btn btn-primary btn-block" value="Place Order" />
+            </dt>
+        </dl>
+    }
+</div>
+

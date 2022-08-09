@@ -1,0 +1,92 @@
+﻿@using GarconDomain.Models;
+@using GarconDomain.ViewModels;
+@model GarconDomain.ViewModels.OrderDetailViewModel
+
+<div>
+    <h4>Order No. @Model.OrderId Billing Details</h4>
+    <hr />
+    @foreach (var item in Model.OrderItems)
+    {
+        <p>
+            @(item.Quantity + "x " + item.MenuItemName) @string.Format("{0:C}", item.MenuItemPrice * item.Quantity)
+        </p>
+    }
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            Sub Total:
+        </dt>
+        <dd>
+            @string.Format("{0:C}", Model.OrderComputation.SubTotal)
+        </dd>
+    </dl>
+    <dl class="dl-horizontal">
+        <dt>
+            Service Charge:
+        </dt>
+        <dd>
+            @string.Format("{0:C}", Model.OrderComputation.ServiceCharge)
+        </dd>
+    </dl>
+    <dl class="dl-horizontal">
+        <dt>
+            Inclusive Tax:
+        </dt>
+        <dd>
+            @string.Format("{0:C}", Model.OrderComputation.InclusiveTax)
+        </dd>
+    </dl>
+
+    <dl class="dl-horizontal">
+        <dt>
+            Total Amount:
+        </dt>
+        <dd>
+            @string.Format("{0:C}", Model.OrderComputation.TotalAmount)
+        </dd>
+    </dl>
+    <dl class="dl-horizontal">
+        @if (Model.OrderStatuId == (int)@Constants.OrderStatus.Paid)
+        {
+            <dt>
+                Bill Date:
+            </dt>
+            <dd>
+                @Model.BillDate
+            </dd>
+        }
+        else
+        {
+            <dt>
+                <input type="button" onclick="billOrder(@Model.OrderId)" class="btn btn-primary" value="Pay Now" />
+            </dt>
+        }
+    </dl>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+
+    var redirectUrl = '@Url.Action("Index","Order")';
+
+    var siteRoot = '@Url.Content("~")';
+    function billOrder(orderId) {
+        $.ajax({
+            type: "POST",
+            url: siteRoot + "Order/ProceedBill",
+            data: '{ orderId : ' + orderId + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                window.location.href = redirectUrl;
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+</script>

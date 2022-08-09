@@ -1,0 +1,174 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model IEnumerable<GarconDomain.Models.MenuItem>
+@{
+    ViewBag.Title = "Index";
+}
+
+<script src="~/Scripts/jquery-3.4.1.min.js"></script>
+
+<div class="container">
+    <div class="row">
+        <div class="col-xs-9">
+            <div class="box box-default">
+                <div class="box-body">
+                    <form id="frmCheckout" method="post">
+                        @{
+                            var crs = Model.Where(a => a.IsChefRecommended == true).ToList();
+                            <div class="row">
+                                <h4>Chef's Recommendation</h4>
+                                <tr>
+                                    @foreach (var menu in crs)
+                                    {
+                                        <td>
+                                            <div class="card col-md-3 col-sm-6 item" style="width: 18rem;">
+                                                <img src=@menu.ImageLink class="card-img-top" alt="...">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">@menu.Name</h6>
+                                                    <p>@string.Format("{0:C}", @menu.Price)</p>
+                                                    <input id="@menu.Id" type="button" onclick="updateDraftOrder(@menu.Id,'Increment')" class="button1" value="Add to Order" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            </div>
+                        }
+                        @foreach (var category in Model.GroupBy(l => l.MenuItemCategoryName).ToList())
+                        {
+                            <div class="row">
+                                <h4>@category.First().MenuItemCategoryName</h4>
+                                <tr>
+                                    @foreach (var menu in category)
+                                    {
+                                        <td>
+                                            <div class="card col-md-3 col-sm-6 item" style="width: 18rem;">
+                                                <img src=@menu.ImageLink class="card-img-top" alt="...">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">@menu.Name</h6>
+                                                    <p>@string.Format("{0:C}", @menu.Price)</p>
+                                                    <input id="@menu.Id" type="button" onclick="updateDraftOrder(@menu.Id,'Increment')" class="button1" value="Add to Order" />
+                                                </div>
+                                            </div>
+                                        </td>
+                                    }
+                                </tr>
+                            </div>
+                            <br />
+                        }
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <input id="draftOrderId" type="hidden" value="@ViewBag.DraftOrderId" />
+            <div id="dvPartial">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    img {
+    height: 150px;
+    width: 100%;
+}
+
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ($("#draftOrderId").val() > 0) {
+            bindPartialView($("#draftOrderId").val());
+        }
+    });
+
+    var siteRoot = '@Url.Content("~")';
+    function updateDraftOrder(menuId, actionStatus) {
+        var draftStatus = 1;
+        switch (actionStatus) {
+            case "Increment":
+                draftStatus = 1;
+                break;
+            case "Decrement":
+                draftStatus = 2;
+                break;
+            default:
+        }
+        var orderItemViewModel =
+        {
+            "OrderId": $("#draftOrderId").val(),
+            "MenuItemId": menuId,
+            "DraftStatus": draftStatus,
+        };
+        $.ajax({
+            async: false,
+            type: "POST",
+            url: siteRoot + "Order/UpdateDraftOrder",
+            data: '{ orderItem : ' + JSON.stringify(orderItemViewModel) + '}',
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function (result) {
+                if (result > 0) {
+                    showAlert("success", "Card Add Success!");
+                    setTimeout(function () {
+                        $("#draftOrderId").val(result)
+                        bindPartialView(result);
+                        //window.location.href = "/TransportCard/Index/";
+                    }, 2000); //will call the function after 2 secs.
+                }
+                else {
+                    showAlert("danger", "Add card failed, Unknown Error :(");
+                }
+            },
+            Error: function (data) {
+                alert(data);
+            }
+        });
+    };
+
+    function bindPartialView(orderId) {
+        $.ajax({
+            type: "POST",
+            url: siteRoot + "Order/GetOrderDetailsPartial",
+            data: '{ orderId : ' + orderId + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                $("#draftOrderId").val(orderId)
+                $('#dvPartial').html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    function placeOrder(orderId) {
+
+        var redirectUrl = '@Url.Action("Index","Order")';
+
+        $.ajax({
+            type: "POST",
+            url: siteRoot + "Order/PlaceOrder",
+            data: '{ orderId : ' + orderId + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                $("#draftOrderId").val(0)
+                window.location.href = redirectUrl;
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+</script>

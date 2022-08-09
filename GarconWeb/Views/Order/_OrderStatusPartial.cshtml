@@ -1,0 +1,111 @@
+﻿@using GarconDomain.Models;
+@using GarconDomain.ViewModels;
+@model IEnumerable<GarconDomain.ViewModels.OrderItemTimeStatusViewModel>
+
+<style>
+    .font-color {
+        color: white;
+    }
+</style>
+
+<table class="table">
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                <p>
+                    <h6 class="card-title">
+                        @("Order No." + @item.OrderId + $" ({item.OrderStatusName})")
+                        @*@if ((@item.OrderItemTimeStatuses.Where(x => x.OrderItemStatusId == (int)@Constants.OrderItemStatus.BeingCooked || x.OrderItemStatusId == (int)@Constants.OrderItemStatus.BeingServed || x.OrderItemStatusId == (int)@Constants.OrderItemStatus.Served).FirstOrDefault() == null))
+                        {
+                            <input type="button" onclick="cancelOrder(@item.OrderId)" class="btn btn-danger" style="color: white" value="Cancel" />
+                        }*@
+                        @if (item.OrderStatusId == (int)@Constants.OrderStatus.Served)
+                        {
+                            <input type="button" onclick="bindBillPartialView(@item.OrderId)" class="btn btn-primary" value="Bill Out" />
+                        }
+                        @if (item.OrderStatusId == (int)@Constants.OrderStatus.Paid)
+                        {
+                            <a onclick="bindBillPartialView(@item.OrderId)" class="stretched-link" style="cursor: pointer">View Bill Details</a>
+                        }
+                    </h6>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <ul>
+                    @foreach (var s in item.OrderItemTimeStatuses)
+                    {
+                        <li>
+                            <p class="card-title">
+                                <span class="label label-default">@(s.Quantity + "x " + s.MenuItemName)</span>
+                                @if (s.OrderItemStatusId != (int)@Constants.OrderItemStatus.Served)
+                                {
+                                    if (s.OrderItemStatusId == (int)@Constants.OrderItemStatus.BeingServed)
+                                    {
+                                        <span class="label label-primary">@(s.OrderItemStatusName + " - " + s.MinutesLeft + " Minute(s) remaining. ")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="label label-warning">@(s.OrderItemStatusName + " - " + s.MinutesLeft + " Minute(s) remaining. ")</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="label label-success">@(s.OrderItemStatusName)</span>
+                                }
+                            </p>
+                        </li>
+                    }
+                </ul>
+            </td>
+        </tr>
+    }
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+    });
+
+    var siteRoot = '@Url.Content("~")';
+    function bindBillPartialView(orderId) {
+        $.ajax({
+            type: "POST",
+            url: siteRoot + "Order/GetOrderBillPartial",
+            data: '{ orderId : ' + orderId + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                $('#dvPartialBill').html(response);
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+    var redirectUrl = '@Url.Action("Index","Order")';
+    function cancelOrder(orderId) {
+        $.ajax({
+            type: "POST",
+            url: siteRoot + "Order/CancelOrder",
+            data: '{ orderId : ' + orderId + '}',
+            contentType: "application/json; charset=utf-8",
+            dataType: "html",
+            success: function (response) {
+                window.location.href = redirectUrl;
+            },
+            failure: function (response) {
+                alert(response.responseText);
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,72 @@
+﻿body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+    background-color: #FCF0CF;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 0.66%;
+    padding-left: 15px;
+    padding-right: 15px;
+    background-color: #FCF0CF;
+    border: dashed 2px #B16E4B;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column 
+*/
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/* start menu grid style */
+.square {
+    float: left;
+    position: relative;
+    width: 30%;
+    padding-bottom: 31%; /* = width for a 1:1 aspect ratio */
+    margin: 1.66%;
+    background-color: #F3D1DC;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.content {
+    position: absolute;
+    height: 90%; /* = 100% - 2*5% padding */
+    width: 90%; /* = 100% - 2*5% padding */
+    padding: 5%;
+}
+
+.table {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.table-cell {
+    display: table-cell;
+    vertical-align: middle;    
+}
+
+/*  For responsive images */
+
+.content .rs {
+    width: auto;
+    height: auto;
+    max-height: 90%;
+    max-width: 100%;
+}
+
+/* Order Text */
+.tooltip {
+    /* */
+}
